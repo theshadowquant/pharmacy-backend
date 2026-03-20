@@ -1,20 +1,11 @@
-// models/db.js
 const sqlite3 = require("sqlite3").verbose();
 const path    = require("path");
 const fs      = require("fs");
 
-// On Render, use /var/data (persistent disk).
-// Locally, use the backend folder itself.
-const DATA_DIR = process.env.RENDER
-  ? "/var/data"
-  : path.join(__dirname, "..");
+// Always store DB in the project folder
+const DATA_DIR = path.join(__dirname, "..");
+const DB_PATH  = path.join(DATA_DIR, "pharmacy.db");
 
-// Make sure the directory exists
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-}
-
-const DB_PATH = path.join(DATA_DIR, "pharmacy.db");
 console.log("📂 Database path:", DB_PATH);
 
 const db = new sqlite3.Database(DB_PATH, (err) => {
@@ -27,18 +18,17 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
 db.run("PRAGMA foreign_keys = ON");
 db.run("PRAGMA journal_mode = WAL");
 
-// Promisified helpers
-db.getAsync  = (sql, params = []) =>
+db.getAsync = (sql, params = []) =>
   new Promise((res, rej) =>
     db.get(sql, params, (e, row) => (e ? rej(e) : res(row)))
   );
 
-db.allAsync  = (sql, params = []) =>
+db.allAsync = (sql, params = []) =>
   new Promise((res, rej) =>
     db.all(sql, params, (e, rows) => (e ? rej(e) : res(rows)))
   );
 
-db.runAsync  = (sql, params = []) =>
+db.runAsync = (sql, params = []) =>
   new Promise((res, rej) =>
     db.run(sql, params, function (e) {
       if (e) return rej(e);
