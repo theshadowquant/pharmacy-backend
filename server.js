@@ -49,6 +49,12 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ success: false, error: "Internal server error" });
 });
 
+// Serve React frontend
+const path = require("path");
+app.use(express.static(path.join(__dirname, "build")));
+app.get(/^(?!\/api).*$/, (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
+});
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`\n🏥  Pharmacy Backend running on port ${PORT}`);
   console.log(`📋  API base: http://localhost:${PORT}/api\n`);
